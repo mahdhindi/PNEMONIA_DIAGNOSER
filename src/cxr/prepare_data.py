@@ -35,16 +35,20 @@ _POPCOUNT = np.array([bin(i).count("1") for i in range(256)], dtype=np.uint8)
 # ----------------------------------------------------------------------------
 # decoding
 # ----------------------------------------------------------------------------
-def load_gray_square(path: str, size: int):
-    """Grayscale, pad to square with black, resize to size x size."""
+def load_gray_square(path: str, size: int, resize: str = "pad"):
+    """Grayscale, then either pad to square with black (keeps aspect ratio, so
+    the amount of padding still reveals the original aspect) or stretch to a
+    square (removes that cue, distorts anatomy).  Then resize to size x size."""
     with Image.open(path) as im:
         mode, (w, h) = im.mode, im.size
         im = im.convert("L")
-        s = max(w, h)
-        canvas = Image.new("L", (s, s), 0)
-        canvas.paste(im, ((s - w) // 2, (s - h) // 2))
-        canvas = canvas.resize((size, size), Image.LANCZOS)
-        arr = np.asarray(canvas, dtype=np.uint8)
+        if resize == "pad":
+            s = max(w, h)
+            canvas = Image.new("L", (s, s), 0)
+            canvas.paste(im, ((s - w) // 2, (s - h) // 2))
+            im = canvas
+        im = im.resize((size, size), Image.LANCZOS)
+        arr = np.asarray(im, dtype=np.uint8)
     return arr, mode, w, h
 
 
@@ -122,6 +126,8 @@ def main(argv=None):
     ap.add_argument("--source", required=True, help="folder containing NORMAL/PNEUMONIA class folders (any depth)")
     ap.add_argument("--out", default="data")
     ap.add_argument("--img_size", type=int, default=224)
+    ap.add_argument("--resize", choices=["pad", "stretch"], default="pad",
+                    help="pad = pad to square then resize (default); stretch = squash to square (removes the aspect-ratio cue)")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--val_frac", type=float, default=0.15)
     ap.add_argument("--test_frac", type=float, default=0.15, help="only used with --split_strategy pooled")
@@ -148,7 +154,7 @@ def main(argv=None):
         try:
             with open(p, "rb") as f:
                 md5 = hashlib.md5(f.read()).hexdigest()
-            arr, mode, w, h = load_gray_square(p, S)
+            arr, mode, w, h = load_gray_square(p, S, args.resize)
             images[i] = arr
             md5s.append(md5); hashes.append(_phash_bits(arr)); modes.append(mode); ws.append(w); hs.append(h)
         except Exception as e:  # corrupt / unreadable file
@@ -160,7 +166,7 @@ def main(argv=None):
 
     # ------------------------------------------------------------------ audit
     problems: list[str] = []
-    audit: dict = {"n_files": int(len(df)), "img_size": S, "resize": "grayscale, pad-to-square (black), LANCZOS resize"}
+    audit: dict = {"n_files": int(len(df)), "img_size": S, "resize": f"grayscale, {args.resize}, LANCZOS resize"}
     audit["per_class"] = df["class_name"].value_counts().to_dict()
     audit["per_split_class"] = df.pivot_table(index="orig_split", columns="class_name", values="path",
                                               aggfunc="count", fill_value=0).astype(int).to_dict()
@@ -339,6 +345,24 @@ def main(argv=None):
                     f"images ({100 * audit['naive_random_split_simulation']['val_images_with_patient_in_train'] / max(n_val, 1):.1f}%) "
                     f"would share a patient with the training set. Our split assigns whole patients.")
 
+    # is the label predictable from acquisition geometry alone?  (a shortcut any model can learn)
+    from sklearn.metrics import roc_auc_score
+    geo = {}
+    for name, part in (("train", tr), ("val", va), ("test", te)):
+        if len(part) and part["label"].nunique() == 2:
+            geo[name] = dict(height=round(float(roc_auc_score(part["label"], -part["height"])), 3),
+                             pixels=round(float(roc_auc_score(part["label"], -(part["width"] * part["height"]))), 3),
+                             aspect=round(float(roc_auc_score(part["label"], part["width"] / part["height"])), 3))
+    audit["label_from_geometry_auroc"] = geo
+    med = lambda part, lab: (int(part.loc[part.label == lab, "width"].median()), int(part.loc[part.label == lab, "height"].median()),
+                             round(float((part.width / part.height)[part.label == lab].median()), 3))
+    if geo.get("train", {}).get("height", 0) > 0.75:
+        problems.append(f"Acquisition geometry leaks the label: image height alone separates the classes with AUROC "
+                        f"{geo['train']['height']} on train / {geo.get('test', {}).get('height', 'n/a')} on test "
+                        f"(median W x H, aspect: NORMAL {med(tr, 0)}, PNEUMONIA {med(tr, 1)} in train). Resizing removes absolute "
+                        f"size; with pad-to-square the aspect ratio survives as padding (AUROC {geo['train']['aspect']} train / "
+                        f"{geo.get('test', {}).get('aspect', 'n/a')} test), a shortcut that transfers poorly to the test folder.")
+
     # subtype breakdown
     final = df[df["split"] != "dropped"]
     audit["subtype_counts"] = final.pivot_table(index="split", columns="subtype", values="path",
@@ -358,14 +382,15 @@ def main(argv=None):
     keep_idx = np.flatnonzero((df["split"] != "dropped").to_numpy())
     df["cache_idx"] = -1
     df.loc[df.index[keep_idx], "cache_idx"] = np.arange(len(keep_idx))
-    np.save(out / "cache" / f"images_{S}.npy", images[keep_idx])
+    suffix = "" if args.resize == "pad" else f"_{args.resize}"
+    np.save(out / "cache" / f"images_{S}{suffix}.npy", images[keep_idx])
     df.to_csv(out / "index.csv", index=False)
     with open(out / "audit.json", "w") as f:
         json.dump(audit, f, indent=2, default=str)
     with open(out / "audit.md", "w") as f:
         f.write(render_audit_md(audit))
     print("\n".join(f" - {p}" for p in problems))
-    print(f"\n[done] splits: {audit['final_split_sizes']}  ->  {out}/index.csv, cache/images_{S}.npy, audit.md "
+    print(f"\n[done] splits: {audit['final_split_sizes']}  ->  {out}/index.csv, cache/images_{S}{suffix}.npy, audit.md "
           f"({audit['seconds']} s)")
 
 

@@ -76,10 +76,11 @@ class CachedCXR(Dataset):
         return self.transform(x), self.labels[i]
 
 
-def load_index(data_dir: str | Path, img_size: int):
+def load_index(data_dir: str | Path, img_size: int, resize: str = "pad"):
     data_dir = Path(data_dir)
     df = pd.read_csv(data_dir / "index.csv")
-    images = np.load(data_dir / "cache" / f"images_{img_size}.npy", mmap_mode="r")
+    suffix = "" if resize == "pad" else f"_{resize}"
+    images = np.load(data_dir / "cache" / f"images_{img_size}{suffix}.npy", mmap_mode="r")
     return df, images
 
 

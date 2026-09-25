@@ -38,6 +38,7 @@ def load_runs(results: Path) -> pd.DataFrame:
         r = json.load(open(f))
         t = r["test"]
         rows.append(dict(model=r["model"], seed=r["seed"], ablation=r["ablation"], frac=float(r["train_fraction"]),
+                         resize=r.get("resize", "pad"), tag=r.get("tag", ""), balanced_acc=t["balanced_accuracy"],
                          params_M=r["params_M"], ckpt_mb=r["checkpoint_mb"], train_time_s=r["train_time_s"],
                          infer_ms=r["infer_ms_per_img"], best_epoch=r["best_epoch"], n_train=r["n_train"],
                          auroc=t["auroc"], accuracy=t["accuracy"], macro_f1=t["macro_f1"], recall=t["recall"],
@@ -51,7 +52,7 @@ def load_runs(results: Path) -> pd.DataFrame:
 
 
 def agg(df: pd.DataFrame, keys) -> pd.DataFrame:
-    metrics = ["auroc", "accuracy", "macro_f1", "recall", "specificity", "train_time_s", "infer_ms"]
+    metrics = ["auroc", "accuracy", "balanced_acc", "macro_f1", "recall", "specificity", "train_time_s", "infer_ms"]
     g = df.groupby(keys)
     out = g[metrics].mean()
     std = g[metrics].std().fillna(0.0)
@@ -76,7 +77,8 @@ def main(argv=None):
     ap.add_argument("--data", default="data")
     a = ap.parse_args(argv)
     R = Path(a.results); F = R / "figures"; F.mkdir(exist_ok=True, parents=True)
-    df = load_runs(R)
+    df_all = load_runs(R)
+    df = df_all[(df_all.resize == "pad") & (df_all.tag == "")]
     order = [m for m in ORDER if m in set(df.model)]
 
     # ------------------------------------------------------------ main table
@@ -89,6 +91,7 @@ def main(argv=None):
         "AUROC": [pm(r, "auroc") for _, r in mt.iterrows()],
         "AUROC 95% CI (seed 1)": [f"[{r.auroc_lo:.3f}, {r.auroc_hi:.3f}]" if not pd.isna(r.auroc_lo) else "" for _, r in mt.iterrows()],
         "Accuracy": [pm(r, "accuracy") for _, r in mt.iterrows()],
+        "Balanced acc.": mt["balanced_acc"].map("{:.4f}".format),
         "Macro-F1": [pm(r, "macro_f1") for _, r in mt.iterrows()],
         "Recall (pneu.)": mt["recall"].map("{:.4f}".format),
         "Specificity": mt["specificity"].map("{:.4f}".format),
@@ -176,6 +179,21 @@ def main(argv=None):
                   f"Training images per fraction: {dict(zip(piv.columns, n_by.astype(int).tolist()))}. Prediction: the gap "
                   "between ImageNet-pretrained models and models learned from scratch widens as data shrinks.", "",
                   md_table(fb), "", "![](figures/ablation_fraction.png)", ""]
+
+    # ------------------------------------------ extra check: stretch resize
+    st = df_all[(df_all.resize == "stretch") & (df_all.ablation == "none") & (df_all.frac == 1.0)]
+    if len(st):
+        sa = agg(st, ["model"]).set_index("model"); ma = mt.set_index("model")
+        rows = [dict(Model=LABEL[m], auroc_pad=ma.at[m, "auroc"], auroc_stretch=sa.at[m, "auroc"],
+                     spec_pad=ma.at[m, "specificity"], spec_stretch=sa.at[m, "specificity"],
+                     bal_acc_pad=ma.at[m, "balanced_acc"], bal_acc_stretch=sa.at[m, "balanced_acc"])
+                for m in order if m in sa.index and m in ma.index]
+        sc = pd.DataFrame(rows)
+        sc.to_csv(R / "check_stretch.csv", index=False)
+        parts += ["## Extra check - removing the aspect-ratio (padding) cue", "",
+                  "Same split, same seeds, images squashed to a square instead of padded, so the original aspect ratio is no "
+                  "longer visible. Tests whether the false positives on test NORMAL images come from the geometry shortcut "
+                  "found in the audit.", "", md_table(sc), ""]
 
     # ------------------------------------------------- errors by subtype
     sub_rows = []

@@ -35,7 +35,8 @@ from .seed import make_generator, set_seed, worker_init_fn
 
 
 def run_name(a) -> str:
-    return f"{a.model}__abl-{a.ablation}__frac-{a.train_fraction:g}__seed-{a.seed}{('__' + a.tag) if a.tag else ''}"
+    extra = ("" if a.resize == "pad" else f"__{a.resize}") + (("__" + a.tag) if a.tag else "")
+    return f"{a.model}__abl-{a.ablation}__frac-{a.train_fraction:g}__seed-{a.seed}{extra}"
 
 
 @torch.no_grad()
@@ -65,6 +66,7 @@ def main(argv=None):
     ap.add_argument("--results", default="results")
     ap.add_argument("--runs", default="runs")
     ap.add_argument("--img_size", type=int, default=224)
+    ap.add_argument("--resize", choices=["pad", "stretch"], default="pad", help="which prepared cache to use")
     ap.add_argument("--epochs", type=int, default=12)
     ap.add_argument("--batch_size", type=int, default=32)
     ap.add_argument("--lr", type=float, default=None, help="override the model's default learning rate")
@@ -89,7 +91,7 @@ def main(argv=None):
     run_dir.mkdir(parents=True, exist_ok=True)
 
     # ------------------------------------------------------------------ data
-    df, images = load_index(a.data, a.img_size)
+    df, images = load_index(a.data, a.img_size, a.resize)
     tr = subsample_train(df[df["split"] == "train"], a.train_fraction, a.seed)
     va, te = df[df["split"] == "val"], df[df["split"] == "test"]
     abl = None if a.ablation == "none" else a.ablation
@@ -178,8 +180,10 @@ def main(argv=None):
         train_time_s=round(train_time, 1), wall_time_s=round(wall_time, 1), epochs=a.epochs if spec["trainable"] else 0,
         best_epoch=best_epoch, infer_ms_per_img=round(1000 * secs / max(len(ds_te), 1), 3),
         peak_gpu_mem_mb=round(torch.cuda.max_memory_allocated() / 1e6, 1) if device.type == "cuda" else None,
-        val=val_m, test=test_m, history=history,
-        config=dict(img_size=a.img_size, batch_size=a.batch_size, lr=lr, weight_decay=a.weight_decay,
+        resize=a.resize, tag=a.tag, val=val_m, test=test_m, history=history,
+        probs=dict(val_y=y_va.astype(int).tolist(), val_p=[round(float(x), 5) for x in p_va],
+                   test_y=y_te.astype(int).tolist(), test_p=[round(float(x), 5) for x in p_te]),
+        config=dict(img_size=a.img_size, resize=a.resize, batch_size=a.batch_size, lr=lr, weight_decay=a.weight_decay,
                     optimizer="AdamW", schedule="1 warm-up epoch + cosine", loss="BCEWithLogits",
                     selection="best val AUROC", amp=amp, hflip=a.hflip,
                     augmentation="RandomResizedCrop(0.8-1) + RandomRotation(7) + brightness/contrast 0.15",
