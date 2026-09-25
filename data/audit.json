@@ -1,0 +1,158 @@
+{
+  "n_files": 11712,
+  "img_size": 224,
+  "resize": "grayscale, pad-to-square (black), LANCZOS resize",
+  "per_class": {
+    "PNEUMONIA": 8546,
+    "NORMAL": 3166
+  },
+  "per_split_class": {
+    "NORMAL": {
+      "test": 468,
+      "train": 2682,
+      "val": 16
+    },
+    "PNEUMONIA": {
+      "test": 780,
+      "train": 7750,
+      "val": 16
+    }
+  },
+  "n_corrupt": 0,
+  "image_modes": {
+    "L": 11146,
+    "RGB": 566
+  },
+  "width": {
+    "min": 384,
+    "median": 1281,
+    "max": 2916
+  },
+  "height": {
+    "min": 127,
+    "median": 888,
+    "max": 2713
+  },
+  "aspect_ratio": {
+    "min": 0.835,
+    "median": 1.416,
+    "max": 3.379
+  },
+  "n_unique_resolutions": 4803,
+  "name_parse_rate": 0.9998,
+  "roboflow_export": false,
+  "exact_duplicates": {
+    "groups": 30,
+    "redundant_files": 94,
+    "packaging_copies": 5794,
+    "groups_spanning_classes": 0,
+    "groups_spanning_splits": 0
+  },
+  "near_duplicates": {
+    "threshold_bits": 10,
+    "hash": "pHash 16x16 (256 bit)",
+    "pairs": 0,
+    "nn_distance_percentiles": {
+      "p1": 44,
+      "p5": 48,
+      "p10": 52,
+      "p25": 56,
+      "p50": 62,
+      "p75": 68,
+      "p90": 74
+    },
+    "pairs_spanning_splits": 0,
+    "pairs_spanning_classes": 0,
+    "pairs_spanning_patients": 0
+  },
+  "patients": {
+    "n_patient_keys": 3288,
+    "per_class": {
+      "NORMAL": 1443,
+      "PNEUMONIA": 1845
+    },
+    "with_multiple_images": 1155,
+    "images_in_multi_image_patients": 3691,
+    "max_images_per_patient": 30
+  },
+  "pneumonia_prior_per_orig_split": {
+    "test": 0.6262,
+    "train": 0.7418,
+    "val": 0.5
+  },
+  "class_balance_overall": 0.7289,
+  "split_strategy": "original_test",
+  "n_groups_in_pool": 2862,
+  "near_dup_edges_used_for_grouping": 0,
+  "leakage_after_our_split": {
+    "patient_keys_shared_train_val": 0,
+    "patient_keys_shared_train_test": 0,
+    "near_dup_pairs_train_test": 0,
+    "near_dup_pairs_train_val": 0
+  },
+  "naive_random_split_simulation": {
+    "val_frac": 0.15,
+    "patients_on_both_sides": 403,
+    "val_images_with_patient_in_train": 479,
+    "val_images_total": 781
+  },
+  "subtype_counts": {
+    "bacteria": {
+      "test": 240,
+      "train": 2145,
+      "val": 375
+    },
+    "normal": {
+      "test": 231,
+      "train": 1145,
+      "val": 203
+    },
+    "unknown": {
+      "test": 0,
+      "train": 0,
+      "val": 1
+    },
+    "virus": {
+      "test": 147,
+      "train": 1134,
+      "val": 203
+    }
+  },
+  "final_splits": {
+    "NORMAL": {
+      "test": 231,
+      "train": 1145,
+      "val": 203
+    },
+    "PNEUMONIA": {
+      "test": 387,
+      "train": 3279,
+      "val": 579
+    }
+  },
+  "final_split_sizes": {
+    "dropped": 5888,
+    "train": 4424,
+    "val": 782,
+    "test": 618
+  },
+  "n_features": {
+    "raw_pixels_median": 1137528,
+    "model_input": "224x224x3 = 150528 values (grayscale replicated to 3 channels)"
+  },
+  "problems": [
+    "566 files are stored as 3-channel RGB although X-rays are grayscale; all images were converted to single-channel.",
+    "Image resolution is not standardised: 4803 distinct sizes, width 384-2916 px, aspect ratio 0.835-3.379. We pad to square before resizing so anatomy is not stretched.",
+    "5794 files are byte-identical copies of a file with the same name (archive packaging, e.g. a nested folder); one copy is kept.",
+    "94 byte-identical duplicate images stored under different names, in 30 groups (0 groups span two original splits, 0 carry conflicting labels). One copy is kept; conflicting-label groups are dropped entirely.",
+    "1155 patients contribute more than one image (3691 images, up to 30 per patient). Splitting by image instead of by patient puts the same child on both sides of a split (leakage).",
+    "Class imbalance: 72.9% of images are PNEUMONIA. Accuracy alone is misleading; a majority-class predictor already scores that number.",
+    "Class prior shifts between the original train (74.2% pneumonia) and test (62.6% pneumonia) folders: the test folder is a separate collection, not an i.i.d. sample of the training distribution.",
+    "The dataset ships a validation folder of only 16 images - useless for model selection. We merge it into the training pool and carve a patient-grouped validation set of our own.",
+    "Simulated naive by-image random split (15% val): 479 of 781 validation images (61.3%) would share a patient with the training set. Our split assigns whole patients."
+  ],
+  "prepared_at": "2026-09-25T12:30:37+00:00",
+  "python": "3.13.15",
+  "source_dir": "/content/repo/data/raw",
+  "seconds": 250.7
+}

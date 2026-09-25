@@ -1,0 +1,138 @@
+{
+  "run": "majority__abl-none__frac-1__seed-42",
+  "model": "majority",
+  "family": "baseline (no learning)",
+  "seed": 42,
+  "ablation": "none",
+  "train_fraction": 1.0,
+  "pretrained": false,
+  "n_train": 4424,
+  "n_val": 782,
+  "n_test": 618,
+  "params": 0,
+  "params_M": 0.0,
+  "checkpoint_mb": 0.0,
+  "train_time_s": 0.0,
+  "wall_time_s": 0.0,
+  "epochs": 0,
+  "best_epoch": -1,
+  "infer_ms_per_img": 1.275,
+  "peak_gpu_mem_mb": 38.5,
+  "val": {
+    "n": 782,
+    "accuracy": 0.7404092071611253,
+    "balanced_accuracy": 0.5,
+    "precision": 0.7404092071611253,
+    "recall": 1.0,
+    "specificity": 0.0,
+    "f1": 0.8508449669360764,
+    "macro_f1": 0.4254224834680382,
+    "auroc": 0.5,
+    "auprc": 0.7404092071611253,
+    "confusion": {
+      "tn": 0,
+      "fp": 203,
+      "fn": 0,
+      "tp": 579
+    },
+    "ci95": {
+      "accuracy": [
+        0.7109654731457801,
+        0.7710997442455243
+      ],
+      "auroc": [
+        0.5,
+        0.5
+      ],
+      "macro_f1": [
+        0.4155346619665874,
+        0.4353790613718412
+      ]
+    },
+    "per_subtype_accuracy": {
+      "bacteria": {
+        "n": 375,
+        "recall_of_true_label": 1.0
+      },
+      "normal": {
+        "n": 203,
+        "recall_of_true_label": 0.0
+      },
+      "unknown": {
+        "n": 1,
+        "recall_of_true_label": 1.0
+      },
+      "virus": {
+        "n": 203,
+        "recall_of_true_label": 1.0
+      }
+    }
+  },
+  "test": {
+    "n": 618,
+    "accuracy": 0.6262135922330098,
+    "balanced_accuracy": 0.5,
+    "precision": 0.6262135922330098,
+    "recall": 1.0,
+    "specificity": 0.0,
+    "f1": 0.7701492537313432,
+    "macro_f1": 0.3850746268656716,
+    "auroc": 0.5,
+    "auprc": 0.6262135922330098,
+    "confusion": {
+      "tn": 0,
+      "fp": 231,
+      "fn": 0,
+      "tp": 387
+    },
+    "ci95": {
+      "accuracy": [
+        0.5921925566343041,
+        0.6650485436893204
+      ],
+      "auroc": [
+        0.5,
+        0.5
+      ],
+      "macro_f1": [
+        0.3719352467558246,
+        0.39941690962099125
+      ]
+    },
+    "per_subtype_accuracy": {
+      "bacteria": {
+        "n": 240,
+        "recall_of_true_label": 1.0
+      },
+      "normal": {
+        "n": 231,
+        "recall_of_true_label": 0.0
+      },
+      "virus": {
+        "n": 147,
+        "recall_of_true_label": 1.0
+      }
+    }
+  },
+  "history": [],
+  "config": {
+    "img_size": 224,
+    "batch_size": 32,
+    "lr": 0.0,
+    "weight_decay": 0.0001,
+    "optimizer": "AdamW",
+    "schedule": "1 warm-up epoch + cosine",
+    "loss": "BCEWithLogits",
+    "selection": "best val AUROC",
+    "amp": true,
+    "hflip": false,
+    "augmentation": "RandomResizedCrop(0.8-1) + RandomRotation(7) + brightness/contrast 0.15",
+    "normalisation": "ImageNet mean/std on grayscale replicated to 3 channels"
+  },
+  "env": {
+    "torch": "2.11.0+cu128",
+    "device": "Tesla T4",
+    "python": "3.13.15",
+    "deterministic": "use_deterministic_algorithms(warn_only=True), cudnn.deterministic"
+  }
+}

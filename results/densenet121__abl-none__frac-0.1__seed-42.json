@@ -1,0 +1,247 @@
+{
+  "run": "densenet121__abl-none__frac-0.1__seed-42",
+  "model": "densenet121",
+  "family": "CNN, ImageNet-pretrained, fine-tuned",
+  "seed": 42,
+  "ablation": "none",
+  "train_fraction": 0.1,
+  "pretrained": true,
+  "n_train": 445,
+  "n_val": 782,
+  "n_test": 618,
+  "params": 6954881,
+  "params_M": 6.955,
+  "checkpoint_mb": 28.38,
+  "train_time_s": 41.2,
+  "wall_time_s": 62.7,
+  "epochs": 12,
+  "best_epoch": 7,
+  "infer_ms_per_img": 2.453,
+  "peak_gpu_mem_mb": 2372.7,
+  "val": {
+    "n": 782,
+    "accuracy": 0.9744245524296675,
+    "balanced_accuracy": 0.9635348868866824,
+    "precision": 0.9794168096054888,
+    "recall": 0.9861830742659758,
+    "specificity": 0.9408866995073891,
+    "f1": 0.9827882960413081,
+    "macro_f1": 0.9665185261301068,
+    "auroc": 0.9960565609127339,
+    "auprc": 0.9985830509622835,
+    "confusion": {
+      "tn": 191,
+      "fp": 12,
+      "fn": 8,
+      "tp": 571
+    },
+    "ci95": {
+      "accuracy": [
+        0.9629156010230179,
+        0.9846867007672634
+      ],
+      "auroc": [
+        0.9930843613207718,
+        0.9983109158449948
+      ],
+      "macro_f1": [
+        0.9511558902430274,
+        0.9805941289289372
+      ]
+    },
+    "per_subtype_accuracy": {
+      "bacteria": {
+        "n": 375,
+        "recall_of_true_label": 0.992
+      },
+      "normal": {
+        "n": 203,
+        "recall_of_true_label": 0.9408866995073891
+      },
+      "unknown": {
+        "n": 1,
+        "recall_of_true_label": 1.0
+      },
+      "virus": {
+        "n": 203,
+        "recall_of_true_label": 0.9753694581280788
+      }
+    }
+  },
+  "test": {
+    "n": 618,
+    "accuracy": 0.8284789644012945,
+    "balanced_accuracy": 0.7731803080640289,
+    "precision": 0.7885010266940452,
+    "recall": 0.9922480620155039,
+    "specificity": 0.5541125541125541,
+    "f1": 0.8787185354691075,
+    "macro_f1": 0.7929504279555482,
+    "auroc": 0.9455462711276664,
+    "auprc": 0.9632854798181655,
+    "confusion": {
+      "tn": 128,
+      "fp": 103,
+      "fn": 3,
+      "tp": 384
+    },
+    "ci95": {
+      "accuracy": [
+        0.7993527508090615,
+        0.8576051779935275
+      ],
+      "auroc": [
+        0.9251677339283727,
+        0.9622950016346496
+      ],
+      "macro_f1": [
+        0.7591754549991997,
+        0.8285185542142531
+      ]
+    },
+    "per_subtype_accuracy": {
+      "bacteria": {
+        "n": 240,
+        "recall_of_true_label": 0.9958333333333333
+      },
+      "normal": {
+        "n": 231,
+        "recall_of_true_label": 0.5541125541125541
+      },
+      "virus": {
+        "n": 147,
+        "recall_of_true_label": 0.9863945578231292
+      }
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.6084588699126512,
+      "val_auroc": 0.9718088772046249,
+      "val_acc": 0.9040920716112532,
+      "val_macro_f1": 0.8831587188697175,
+      "epoch_time_s": 5.248068267000235,
+      "lr": 0.0001
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.21963687056905767,
+      "val_auroc": 0.9913686753958328,
+      "val_acc": 0.9718670076726342,
+      "val_macro_f1": 0.9630498281786941,
+      "epoch_time_s": 3.0440708849996554,
+      "lr": 9.797464868072488e-05
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.11372155381387539,
+      "val_auroc": 0.9934743952968002,
+      "val_acc": 0.9757033248081841,
+      "val_macro_f1": 0.9684475864251145,
+      "epoch_time_s": 3.9058904989997245,
+      "lr": 9.206267664155907e-05
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.056889349925384095,
+      "val_auroc": 0.9937551579502625,
+      "val_acc": 0.9514066496163683,
+      "val_macro_f1": 0.9332314744079451,
+      "epoch_time_s": 3.080327367999871,
+      "lr": 8.274303669726426e-05
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.05554921776893434,
+      "val_auroc": 0.9953206224422948,
+      "val_acc": 0.9744245524296675,
+      "val_macro_f1": 0.9665185261301068,
+      "epoch_time_s": 3.3445291620000717,
+      "lr": 7.077075065009433e-05
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.031556065874488164,
+      "val_auroc": 0.9950015739724511,
+      "val_acc": 0.9757033248081841,
+      "val_macro_f1": 0.9684475864251145,
+      "epoch_time_s": 3.0038884749997123,
+      "lr": 5.7115741913664264e-05
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.030056173940388006,
+      "val_auroc": 0.9960565609127339,
+      "val_acc": 0.9744245524296675,
+      "val_macro_f1": 0.9665185261301068,
+      "epoch_time_s": 3.092641764000291,
+      "lr": 4.288425808633575e-05
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.030825187100537037,
+      "val_auroc": 0.9956269089733446,
+      "val_acc": 0.9705882352941176,
+      "val_macro_f1": 0.9619259306300871,
+      "epoch_time_s": 3.96077908999996,
+      "lr": 2.9229249349905684e-05
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.02292277401501543,
+      "val_auroc": 0.9954695117282217,
+      "val_acc": 0.9718670076726342,
+      "val_macro_f1": 0.9631703787431174,
+      "epoch_time_s": 3.0886474740000267,
+      "lr": 1.725696330273575e-05
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.012157671580488761,
+      "val_auroc": 0.9958864017288174,
+      "val_acc": 0.9718670076726342,
+      "val_macro_f1": 0.9634072674987451,
+      "epoch_time_s": 3.1285170589999325,
+      "lr": 7.937323358440935e-06
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.017476523333762803,
+      "val_auroc": 0.9959246875451986,
+      "val_acc": 0.969309462915601,
+      "val_macro_f1": 0.9599522021167634,
+      "epoch_time_s": 3.12413824999976,
+      "lr": 2.0253513192751373e-06
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.011532391930061779,
+      "val_auroc": 0.9958778937696214,
+      "val_acc": 0.969309462915601,
+      "val_macro_f1": 0.9599522021167634,
+      "epoch_time_s": 3.134674862000338,
+      "lr": 0.0
+    }
+  ],
+  "config": {
+    "img_size": 224,
+    "batch_size": 32,
+    "lr": 0.0001,
+    "weight_decay": 0.0001,
+    "optimizer": "AdamW",
+    "schedule": "1 warm-up epoch + cosine",
+    "loss": "BCEWithLogits",
+    "selection": "best val AUROC",
+    "amp": true,
+    "hflip": false,
+    "augmentation": "RandomResizedCrop(0.8-1) + RandomRotation(7) + brightness/contrast 0.15",
+    "normalisation": "ImageNet mean/std on grayscale replicated to 3 channels"
+  },
+  "env": {
+    "torch": "2.11.0+cu128",
+    "device": "Tesla T4",
+    "python": "3.13.15",
+    "deterministic": "use_deterministic_algorithms(warn_only=True), cudnn.deterministic"
+  }
+}
