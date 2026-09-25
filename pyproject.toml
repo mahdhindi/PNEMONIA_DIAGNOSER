@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cxr-algo-compare"
+version = "0.1.0"
+description = "CSBP711 A1 - fair comparison of classifiers for pediatric chest X-ray pneumonia detection"
+requires-python = ">=3.10"
+dependencies = [
+  "torch>=2.2",
+  "torchvision>=0.17",
+  "numpy",
+  "pandas",
+  "scikit-learn",
+  "Pillow",
+  "imagehash",
+  "matplotlib",
+  "tqdm",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

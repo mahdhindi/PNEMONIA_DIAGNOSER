@@ -1,0 +1,13 @@
+data/raw/
+data/cache/
+runs/
+__pycache__/
+*.pyc
+*.egg-info/
+.ipynb_checkpoints/
+kaggle.json
+!data/raw/DOWNLOAD_INFO.json
+data_smoke/
+results_smoke/
+runs_smoke/
+a1_results.zip
