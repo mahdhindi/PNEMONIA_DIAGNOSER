@@ -181,9 +181,11 @@ def main(argv=None):
                   md_table(fb), "", "![](figures/ablation_fraction.png)", ""]
 
     # ------------------------------------------ extra check: stretch resize
-    st = df_all[(df_all.resize == "stretch") & (df_all.ablation == "none") & (df_all.frac == 1.0)]
+    st = df_all[(df_all.resize == "stretch") & (df_all.ablation == "none") & (df_all.frac == 1.0) & (df_all.tag == "")]
     if len(st):
-        sa = agg(st, ["model"]).set_index("model"); ma = mt.set_index("model")
+        # compare against the padded runs of the SAME seeds, so the check is apples to apples
+        pad_same = main[main.seed.isin(st.seed.unique())]
+        sa = agg(st, ["model"]).set_index("model"); ma = agg(pad_same, ["model"]).set_index("model")
         rows = [dict(Model=LABEL[m], auroc_pad=ma.at[m, "auroc"], auroc_stretch=sa.at[m, "auroc"],
                      spec_pad=ma.at[m, "specificity"], spec_stretch=sa.at[m, "specificity"],
                      bal_acc_pad=ma.at[m, "balanced_acc"], bal_acc_stretch=sa.at[m, "balanced_acc"])
@@ -191,9 +193,10 @@ def main(argv=None):
         sc = pd.DataFrame(rows)
         sc.to_csv(R / "check_stretch.csv", index=False)
         parts += ["## Extra check - removing the aspect-ratio (padding) cue", "",
-                  "Same split, same seeds, images squashed to a square instead of padded, so the original aspect ratio is no "
-                  "longer visible. Tests whether the false positives on test NORMAL images come from the geometry shortcut "
-                  "found in the audit.", "", md_table(sc), ""]
+                  f"Same split, same seed(s) ({sorted(st.seed.unique().tolist())}), images squashed to a square instead of "
+                  "padded, so the original aspect ratio is no longer visible. Tests whether the false positives on test "
+                  "NORMAL images come from the geometry shortcut found in the audit. Padded numbers here are for the same "
+                  "seed(s) only.", "", md_table(sc), ""]
 
     # ------------------------------------------------- errors by subtype
     sub_rows = []
