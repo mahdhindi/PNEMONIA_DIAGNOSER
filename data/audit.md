@@ -1,6 +1,6 @@
 # Data audit
 
-Prepared 2026-09-25T12:30:37+00:00 from `/content/repo/data/raw` (strategy: `original_test`).
+Prepared 2026-09-25T15:02:17+00:00 from `/content/repo/data/raw` (strategy: `original_test`).
 
 ## Size
 
@@ -28,7 +28,8 @@ Prepared 2026-09-25T12:30:37+00:00 from `/content/repo/data/raw` (strategy: `ori
 7. Class prior shifts between the original train (74.2% pneumonia) and test (62.6% pneumonia) folders: the test folder is a separate collection, not an i.i.d. sample of the training distribution.
 8. The dataset ships a validation folder of only 16 images - useless for model selection. We merge it into the training pool and carve a patient-grouped validation set of our own.
 9. Simulated naive by-image random split (15% val): 479 of 781 validation images (61.3%) would share a patient with the training set. Our split assigns whole patients.
+10. Acquisition geometry leaks the label: image height alone separates the classes with AUROC 0.916 on train / 0.921 on test (median W x H, aspect: NORMAL (1636, 1318, 1.222), PNEUMONIA (1168, 784, 1.484) in train). Resizing removes absolute size; with pad-to-square the aspect ratio survives as padding (AUROC 0.865 train / 0.703 test), a shortcut that transfers poorly to the test folder.
 
 ## Near-duplicate calibration
 
-Nearest-neighbour pHash distance percentiles: {'p1': 44, 'p5': 48, 'p10': 52, 'p25': 56, 'p50': 62, 'p75': 68, 'p90': 74} (threshold 10 bits of 256).
+Nearest-neighbour pHash distance percentiles: {'p1': 50, 'p5': 56, 'p10': 60, 'p25': 66, 'p50': 72, 'p75': 78, 'p90': 84} (threshold 10 bits of 256).
